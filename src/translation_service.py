@@ -117,6 +117,9 @@ class TranslationService:
         """Read a Jupyter notebook and extract markdown cells for translation."""
         with open(file_path, 'r', encoding='utf-8') as f:
             notebook = nbformat.read(f, as_version=4)
+            # Normalize the notebook to add missing cell IDs
+            notebook = nbformat.v4.upgrade(notebook)
+            nbformat.validate(notebook)
         
         # Store the original notebook structure in memory
         self._current_notebook = notebook
@@ -156,6 +159,10 @@ class TranslationService:
                 new_cell = cell
             
             new_notebook.cells.append(new_cell)
+        
+        # Normalize the notebook to add missing cell IDs
+        new_notebook = nbformat.v4.upgrade(new_notebook)
+        nbformat.validate(new_notebook)
         
         # Write the notebook
         with open(output_path, 'w', encoding='utf-8') as f:
