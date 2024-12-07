@@ -38,6 +38,7 @@ input_files/
 output_files/
 temp_downloads/
 translated_files/
+oldFolders/
 
 # Logs
 *.log

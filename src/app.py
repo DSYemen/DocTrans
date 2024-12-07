@@ -20,6 +20,27 @@ st.set_page_config(
     layout="wide"
 )
 
+st.title("🌐 AI Documentation Translator")
+st.markdown("""
+Welcome to the AI Documentation Translator! This tool helps you translate technical documentation from GitHub repositories into Arabic.
+
+### Features:
+- Download files from GitHub repositories
+- Translate documentation using various LLM providers
+- Upload translated files back to GitHub
+- Support for multiple file formats (.md, .mdx, .rst, .py, .html)
+
+### Getting Started:
+1. Navigate to the **Download Files** page to fetch documentation from GitHub
+2. Use the **Translate Files** page to select and translate downloaded files
+3. Upload completed translations using the **Upload Translations** page
+
+### Navigation:
+- 📥 **Download Files**: Fetch documentation from GitHub
+- 🔄 **Translate Files**: Select and translate downloaded files
+- ⬆️ **Upload Translations**: Push translated files to GitHub
+""")
+
 # Custom CSS
 st.markdown("""
     <style>
@@ -81,9 +102,6 @@ def cleanup_translated_file(file_path: str):
 
 def main():
     initialize_session_state()
-    
-    st.title("🌐 AI Documentation Translator")
-    st.markdown("Translate your documentation files from GitHub repositories using AI")
     
     # Sidebar configuration
     with st.sidebar:
@@ -190,7 +208,7 @@ def main():
         
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
-    
+
     # Display downloaded files
     if st.session_state.downloaded_files:
         st.subheader("Available Files")
