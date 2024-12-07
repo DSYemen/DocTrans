@@ -6,7 +6,7 @@ import yaml
 class AppConfig:
     default_model: str = "gemini"
     max_tokens: int = 8292
-    supported_file_types: tuple = (".md", ".mdx", ".rst", ".rstx", ".py", ".html")
+    supported_file_types: tuple = (".md", ".mdx", ".rst", ".rstx", ".py", ".html",".ipynb")
     
     # LLM API configurations
     llm_configs: Dict = None

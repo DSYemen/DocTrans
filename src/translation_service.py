@@ -8,6 +8,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_community.document_loaders import UnstructuredMarkdownLoader, UnstructuredHTMLLoader
 from langchain.text_splitter import MarkdownTextSplitter
+import nbformat
+from nbformat import NotebookNode
 
 class TranslationService:
     def __init__(self, llm, glossary: Optional[Dict] = None):
@@ -95,23 +97,66 @@ class TranslationService:
         elif suffix == '.py':
             with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
+        elif suffix == '.ipynb':
+            return self._read_notebook(file_path)
         else:
             raise ValueError(f"Unsupported file type: {suffix}")
     
     def _write_file(self, output_path: Path, content: str, suffix: str):
         if suffix in ['.md', '.mdx']:
-            # Preserve frontmatter if exists
-            try:
-                original = frontmatter.load(output_path.with_suffix(suffix))
-                with open(output_path, 'w', encoding='utf-8') as f:
-                    if original.metadata:
-                        f.write(frontmatter.dumps(frontmatter.Post(content, **original.metadata)))
-                    else:
-                        f.write(content)
-            except:
-                # If there's no existing file or no frontmatter, just write the content
-                with open(output_path, 'w', encoding='utf-8') as f:
-                    f.write(content)
+            post = frontmatter.loads('')
+            post.content = content
+            frontmatter.dump(post, output_path)
+        elif suffix == '.ipynb':
+            self._write_notebook(output_path, content)
         else:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(content)
+
+    def _read_notebook(self, file_path: Path) -> str:
+        """Read a Jupyter notebook and extract markdown cells for translation."""
+        with open(file_path, 'r', encoding='utf-8') as f:
+            notebook = nbformat.read(f, as_version=4)
+        
+        # Store the original notebook structure in memory
+        self._current_notebook = notebook
+        
+        # Extract only markdown cells
+        markdown_contents = []
+        for cell in notebook.cells:
+            if cell.cell_type == 'markdown':
+                markdown_contents.append(cell.source)
+        
+        # Join markdown contents with a special separator that we can split on later
+        return '\n<<<CELL_SEPARATOR>>>\n'.join(markdown_contents)
+    
+    def _write_notebook(self, output_path: Path, translated_content: str):
+        """Write the translated notebook, preserving code cells and outputs."""
+        if not hasattr(self, '_current_notebook'):
+            raise ValueError("No notebook structure found. Please read a notebook first.")
+        
+        # Split the translated content back into cells
+        translated_cells = translated_content.split('\n<<<CELL_SEPARATOR>>>\n')
+        
+        # Create a new notebook with the same metadata
+        new_notebook = nbformat.v4.new_notebook(metadata=self._current_notebook.metadata)
+        
+        # Counter for markdown cells
+        markdown_idx = 0
+        
+        # Reconstruct the notebook
+        for cell in self._current_notebook.cells:
+            if cell.cell_type == 'markdown':
+                # Replace markdown content with translated content
+                if markdown_idx < len(translated_cells):
+                    new_cell = nbformat.v4.new_markdown_cell(translated_cells[markdown_idx])
+                    markdown_idx += 1
+            else:
+                # Preserve code cells and their outputs exactly as they are
+                new_cell = cell
+            
+            new_notebook.cells.append(new_cell)
+        
+        # Write the notebook
+        with open(output_path, 'w', encoding='utf-8') as f:
+            nbformat.write(new_notebook, f)

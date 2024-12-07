@@ -55,11 +55,12 @@ def get_downloaded_files():
     for repo_dir in input_dir.iterdir():
         if repo_dir.is_dir():
             for file_path in repo_dir.rglob("*"):
-                if file_path.is_file() and file_path.suffix in ['.md', '.mdx', '.rst', '.rstx', '.py', '.html']:
+                if file_path.is_file() and file_path.suffix.lower() in AppConfig.supported_file_types:
                     files.append({
                         'path': str(file_path),
                         'name': str(file_path.relative_to(input_dir)),
-                        'repo': repo_dir.name
+                        'repo': repo_dir.name,
+                        'type': file_path.suffix.lower()
                     })
     return files
 
@@ -81,6 +82,11 @@ def main():
     
     st.title("🔄 Translate Downloaded Files")
     st.markdown("Select and translate downloaded documentation files")
+    
+    # Show supported file types
+    st.markdown("### Supported File Types")
+    file_types = ", ".join([f"`{ext}`" for ext in AppConfig.supported_file_types])
+    st.markdown(f"This tool supports translation of the following file types: {file_types}")
     
     # LLM Configuration
     with st.sidebar:

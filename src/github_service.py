@@ -3,6 +3,7 @@ from pathlib import Path
 from github import Github, GithubException
 from urllib.parse import urlparse
 import base64
+from config import AppConfig
 
 class GitHubService:
     def __init__(self, token=None):
@@ -60,8 +61,9 @@ class GitHubService:
             # Get the repository
             repo = self.github.get_repo(repo_path)
             
+            # Use AppConfig's supported file types by default
             if not file_types:
-                file_types = ['.md', '.mdx', '.rst', '.rstx', '.py', '.html']
+                file_types = AppConfig.supported_file_types
             
             files = []
             try:
@@ -75,7 +77,7 @@ class GitHubService:
                     if file_content.type == "dir":
                         contents.extend(repo.get_contents(file_content.path, ref=branch))
                     else:
-                        if any(file_content.path.endswith(ext) for ext in file_types):
+                        if any(file_content.path.lower().endswith(ext.lower()) for ext in file_types):
                             files.append(file_content)
             
             except GithubException as e:
@@ -99,23 +101,36 @@ class GitHubService:
             # Create the folder name using only repo name and path
             folder_components = [repo]
             if folder_path:
-                folder_components.extend(folder_path.strip('/').split('/'))
-            folder_name = '_'.join(folder_components)
+                # Clean folder path and add it to components
+                clean_folder_path = folder_path.strip('/').replace('/', '_')
+                if clean_folder_path:
+                    folder_components.append(clean_folder_path)
             
-            # Create the full path for the file
-            download_dir = Path(base_dir) / folder_name
-            download_dir.mkdir(parents=True, exist_ok=True)
+            # Use base_dir directly as it's already set to input_files
+            output_dir = Path(base_dir) / '_'.join(folder_components)
+            output_dir.mkdir(parents=True, exist_ok=True)
             
-            # Create the full local path for the file
-            local_path = download_dir / relative_path
-            local_path.parent.mkdir(parents=True, exist_ok=True)
+            # Create full file path maintaining directory structure
+            relative_path_parts = relative_path.split('/')
+            if len(relative_path_parts) > 1:
+                # Create subdirectories if needed
+                sub_dir = output_dir / '/'.join(relative_path_parts[:-1])
+                sub_dir.mkdir(parents=True, exist_ok=True)
+            
+            output_path = output_dir / relative_path
+            
+            # Ensure the parent directory exists
+            output_path.parent.mkdir(parents=True, exist_ok=True)
             
             # Download and save the file
-            content = base64.b64decode(file_content.content).decode('utf-8')
-            local_path.write_text(content, encoding='utf-8')
-            
-            return str(local_path)
-        
+            try:
+                content = base64.b64decode(file_content.content)
+                with open(output_path, 'wb') as f:
+                    f.write(content)
+                return str(output_path)
+            except Exception as e:
+                raise Exception(f"Error writing file {output_path}: {str(e)}")
+                
         except Exception as e:
             raise Exception(f"Error downloading file {file_content.path}: {str(e)}")
 

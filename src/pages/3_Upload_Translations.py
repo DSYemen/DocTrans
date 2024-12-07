@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from github import Github, GithubException
 from dotenv import load_dotenv
+from config import AppConfig
 
 # Load environment variables
 load_dotenv()
@@ -28,11 +29,12 @@ def get_translated_files():
     for repo_dir in output_dir.iterdir():
         if repo_dir.is_dir():
             for file_path in repo_dir.rglob("*"):
-                if file_path.is_file() and file_path.suffix in ['.md', '.mdx', '.rst', '.rstx', '.py', '.html']:
+                if file_path.is_file() and file_path.suffix.lower() in AppConfig.supported_file_types:
                     files.append({
                         'path': str(file_path),
                         'name': file_path.name,
-                        'repo': repo_dir.name
+                        'repo': repo_dir.name,
+                        'type': file_path.suffix.lower()
                     })
     return files
 
@@ -52,9 +54,16 @@ def delete_file(file_path: str):
 def upload_to_github(repo, file_info: dict, target_path: str, branch: str) -> bool:
     """Upload a file to GitHub repository."""
     try:
-        # Read file content with UTF-8 encoding
-        with open(file_info['path'], 'r', encoding='utf-8') as f:
-            content = f.read()
+        # Read file content based on file type
+        file_path = Path(file_info['path'])
+        is_binary = file_path.suffix.lower() in ['.ipynb']  # Add other binary file types if needed
+        
+        if is_binary:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+        else:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
         
         # Get just the filename from the full path
         file_name = os.path.basename(file_info['path'])
@@ -100,14 +109,19 @@ def upload_to_github(repo, file_info: dict, target_path: str, branch: str) -> bo
             return False
             
     except Exception as e:
-        st.error(f"Error uploading {file_info['name']}: {str(e)}")
+        st.error(f"Error uploading file: {str(e)}")
         return False
 
 def main():
     initialize_session_state()
     
-    st.title("⬆️ Upload Translations to GitHub")
-    st.markdown("Enter a GitHub URL to upload translated files")
+    st.title("⬆️ Upload Translated Files")
+    st.markdown("Upload your translated files to GitHub")
+    
+    # Show supported file types
+    st.markdown("### Supported File Types")
+    file_types = ", ".join([f"`{ext}`" for ext in AppConfig.supported_file_types])
+    st.markdown(f"This tool supports uploading the following file types: {file_types}")
     
     # GitHub configuration
     github_token = st.text_input(
