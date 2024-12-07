@@ -1,0 +1,26 @@
+# Default LLM Configuration
+default_model: "gemini"
+max_tokens: 8292
+
+# Supported file types
+supported_file_types:
+  - ".md"
+  - ".mdx"
+  - ".rst"
+  - ".rstx"
+  - ".py"
+  - ".html"
+
+# LLM Provider Configurations
+llm_configs:
+  gemini:
+    temperature: 0.3
+  cohere:
+    temperature: 0.3
+  groq:
+    temperature: 0.3
+  together:
+    temperature: 0.3
+
+# Translation Settings
+output_directory: "translated_files"
