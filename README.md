@@ -1,121 +1,98 @@
-# AI Documentation Translator
+# أداة ترجمة الوثائق التقنية 🌐
 
-An advanced Streamlit application that translates documentation files from GitHub repositories using various Large Language Models (LLMs). The application supports multiple file formats and maintains the original formatting while translating content to Arabic.
+أداة مبنية على Streamlit لترجمة الوثائق التقنية من GitHub إلى اللغة العربية باستخدام نماذج اللغة المتقدمة.
 
-## Features
+## المميزات الرئيسية 🚀
 
-- 📚 Multi-format Support:
-  - Markdown (.md)
-  - MDX (.mdx)
-  - ReStructuredText (.rst, .rstx)
-  - Python (.py)
-  - HTML (.html)
-- 🤖 Multiple LLM Providers:
-  - Google Gemini
-  - Cohere
-  - Groq
-  - Together AI
-- 🔄 Smart Features:
-  - Automatic token splitting for large files
-  - Custom glossary support
-  - Preserves formatting, code blocks, and special elements
-  - Maintains directory structure
-- 🌐 GitHub Integration:
-  - Repository-specific downloads
-  - Branch selection
-  - Folder/file filtering
-  - Automatic folder naming
+### 1. التكامل مع GitHub
+- تحميل الملفات من مستودعات GitHub
+- ترجمة الملفات باستخدام مزودي LLM المختلفين
+- رفع الملفات المترجمة مرة أخرى إلى GitHub
+- دعم أنواع الملفات المتعددة:
+  * Markdown (.md, .mdx)
+  * ReStructuredText (.rst, .rstx)
+  * Python (.py)
+  * HTML
 
-## Directory Structure
+### 2. إدارة الملفات المتقدمة
+- هيكل مجلدات ديناميكي
+- الحفاظ على التسلسل الهرمي للملفات الأصلية
+- دعم التحميل الجزئي للمستودع
+- إمكانية اختيار الملفات للترجمة والرفع
 
-```
-.
-├── input_files/               # Base directory for downloaded files
-│   └── [repository_name]/     # Repository-specific downloads
-├── output_files/             # Base directory for translated files
-│   └── [repository_name]/    # Repository-specific translations
-├── src/                      # Source code
-│   ├── app.py               # Main Streamlit application
-│   ├── config.py            # Configuration management
-│   ├── github_service.py    # GitHub integration
-│   ├── llm_factory.py       # LLM provider management
-│   └── translation_service.py  # Translation logic
-├── config.yaml              # Application configuration
-├── requirements.txt         # Project dependencies
-└── README.md               # Documentation
-```
+### 3. واجهة المستخدم
+- ثلاث صفحات رئيسية:
+  1. تحميل الملفات
+  2. ترجمة الملفات
+  3. رفع الترجمات
+- أقسام قابلة للتوسيع للمستودعات
+- اختيار الملفات مع خيارات الحذف
+- تتبع تقدم التحميل والترجمة
 
-## Installation
+## المتطلبات 📋
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/ai-doc-translator.git
-cd ai-doc-translator
-```
-
-2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file with your API keys:
+## المتغيرات البيئية 🔑
+
+قم بإنشاء ملف `.env` في المجلد الرئيسي وأضف المتغيرات التالية:
+
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 COHERE_API_KEY=your_cohere_api_key
 GROQ_API_KEY=your_groq_api_key
 TOGETHER_API_KEY=your_together_api_key
-GITHUB_TOKEN=your_github_token  # Optional
+GITHUB_TOKEN=your_github_token  # اختياري، مطلوب للمستودعات الخاصة
 ```
 
-## Usage
+## الاستخدام 🚀
 
-1. Run the Streamlit application:
+1. قم بتشغيل التطبيق:
 ```bash
 streamlit run src/app.py
 ```
 
-2. Enter GitHub repository information:
-   - Repository URL
-   - Branch name (defaults to "main")
-   - Folder path (e.g., "docs/folder/")
-   - Optional specific file path
+2. في صفحة "تحميل الملفات":
+   - أدخل رابط مستودع GitHub
+   - حدد الملفات التي تريد تحميلها
+   - انقر على "تحميل الملفات المحددة"
 
-3. The application will automatically:
-   - Create input folder using repository name
-   - Create output folder using repository name
-   - Maintain the original directory structure
+3. في صفحة "ترجمة الملفات":
+   - اختر مزود LLM
+   - حدد الملفات للترجمة
+   - انقر على "ترجمة الملفات المحددة"
 
-4. Select files to translate and click "Start Translation"
+4. في صفحة "رفع الترجمات":
+   - أدخل رابط المستودع الهدف
+   - حدد الملفات المترجمة
+   - انقر على "رفع الملفات المحددة"
 
-## Custom Glossary
+## هيكل المشروع 📁
 
-Create a YAML file with your custom translations:
-
-```yaml
-terms:
-  "machine learning": "التعلم الآلي"
-  "deep learning": "التعلم العميق"
-  "artificial intelligence": "الذكاء الاصطناعي"
+```
+project_root/
+├── input_files/               # الملفات المحملة من المستودع
+│   └── [repo_path_components]/
+├── output_files/             # الملفات المترجمة
+│   └── [repo_path_components]/
+├── src/
+│   ├── app.py               # واجهة Streamlit الرئيسية
+│   ├── config.py           # إدارة الإعدادات
+│   ├── github_service.py   # التفاعل مع مستودعات GitHub
+│   ├── llm_factory.py      # إدارة مزودي LLM
+│   └── translation_service.py # منطق الترجمة
 ```
 
-## File Organization
+## المساهمة 🤝
 
-- Downloaded files are stored in: `input_files/[repository_name]/`
-- Translated files are stored in: `output_files/[repository_name]/`
-- Original directory structure is maintained in both locations
+نرحب بمساهماتكم! يرجى اتباع الخطوات التالية:
 
-## Translation Process
+1. Fork المستودع
+2. إنشاء فرع للميزة الجديدة
+3. تقديم طلب سحب مع وصف تفصيلي للتغييرات
 
-1. Files are downloaded to the input directory
-2. Large files are automatically split into manageable chunks
-3. Only text content is translated; code, links, and formatting are preserved
-4. Translated content is saved with the same structure in the output directory
-5. Input files are automatically cleaned up after successful translation
+## الترخيص 📄
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+هذا المشروع مرخص تحت رخصة MIT. راجع ملف `LICENSE` للمزيد من المعلومات.
