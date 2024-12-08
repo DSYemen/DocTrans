@@ -10,6 +10,7 @@ supported_file_types:
   - ".rstx"
   - ".py"
   - ".html"
+  - ".ipynb"
 
 # LLM Provider Configurations
 llm_configs:
@@ -22,5 +23,9 @@ llm_configs:
   together:
     temperature: 0.3
 
+# Directory Configuration
+input_directory: "input_files"
+output_directory: "output_files"
+
 # Translation Settings
-output_directory: "translated_files"
+translated_output_directory: "translated_files"

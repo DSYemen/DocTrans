@@ -71,7 +71,8 @@ class TranslationService:
                 relative_path = file_path.name
             
         # Create the output path maintaining the directory structure
-        output_path = Path(base_output_dir) / translation_folder / relative_path
+        # output_path = Path(base_output_dir) / translation_folder / relative_path
+        output_path = Path(base_output_dir) / relative_path
         os.makedirs(output_path.parent, exist_ok=True)
         
         # Read and translate content
